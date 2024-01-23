@@ -1,0 +1,23 @@
+{
+  "name": "battleship-terminal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "part-1.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knightmac19/battleship-terminal.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/knightmac19/battleship-terminal/issues"
+  },
+  "homepage": "https://github.com/knightmac19/battleship-terminal#readme",
+  "dependencies": {
+    "readline-sync": "^1.4.10"
+  }
+}
