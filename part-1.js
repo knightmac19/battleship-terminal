@@ -20,14 +20,26 @@ const getRandomNumber = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-const generateCoordinates = () => {
+const generateCoordinates = (shipNum, alreadyAssigned = []) => {
   let coordinates = [];
-  for (let i = 0; i < 2; i++) {
-    coordinates.push(getRandomNumber(0, 3));
+  for (let i = 1; i < 3; i++) {
+    coordinates.push(getRandomNumber(1, 4));
+  }
+
+  // recursion call to ensure the ships don't have the same coordinates
+  if (
+    shipNum === 2 &&
+    alreadyAssigned[0] === shipOneCoordinates[0] &&
+    alreadyAssigned[1] === shipTwoCoordinates[1]
+  ) {
+    generateCoordinates(2);
   }
 
   return coordinates;
 };
+
+let shipOneCoordinates = generateCoordinates(1);
+let shipTwoCoordinates = generateCoordinates(2);
 
 const init = () => {
   console.log("Press any key to start the game");
@@ -37,11 +49,8 @@ const init = () => {
 
   let shipsRemaining = 2;
 
-  let shipOneCoordinates = generateCoordinates();
-  let shipTwoCoordinates = generateCoordinates();
-
-  console.log(shipOneCoordinates);
-  console.log(shipTwoCoordinates);
+  console.log(`shipOneCoordinates: ${shipOneCoordinates}`);
+  console.log(`shipTwoCoordinates: ${shipTwoCoordinates}`);
 
   while (shipsRemaining > 0) {
     console.log(displayBoard(gameBoard));
@@ -52,12 +61,50 @@ const init = () => {
 
     const col = input.charCodeAt(0) - 64;
     const row = parseInt(input[1]);
-    console.log(`col: ${col}, row: ${row}`);
+    console.log(`row: ${row}, col: ${col}`);
 
     console.log(validateGuess(col, row));
 
-    checkForHit(shipOneCoordinates, col, row);
-    checkForHit(shipTwoCoordinates, col, row);
+    if (!validateGuess(row, col)) {
+      console.log("Invalid input. Try again.");
+      continue;
+    }
+
+    if (checkForHit(shipOneCoordinates, row, col)) {
+      console.log(
+        `Hit. You have sunk a battleship. ${--shipsRemaining} ship(s) remaining`
+      );
+      console.log(`gameboard row col: ${gameBoard[row][col]}`);
+      gameBoard[row][col] = "X";
+    } else if (
+      !checkForHit(shipOneCoordinates, row, col) &&
+      gameBoard[row][col] === "O"
+    ) {
+      console.log(`Missed. Try again!`);
+      console.log(`gameboard row col: ${gameBoard[row][col]}`);
+      gameBoard[row][col] = "M";
+    } else {
+      console.log(`gameboard row col: ${gameBoard[row][col]}`);
+      console.log("You have already picked this location. Miss!");
+    }
+
+    if (checkForHit(shipTwoCoordinates, row, col)) {
+      console.log(
+        `Hit. You have sunk a battleship. ${--shipsRemaining} ship(s) remaining`
+      );
+      console.log(`gameboard row col: ${gameBoard[row][col]}`);
+      gameBoard[row][col] = "X";
+    } else if (
+      !checkForHit(shipTwoCoordinates, row, col) &&
+      gameBoard[row][col] === "O"
+    ) {
+      console.log(`Missed. Try again!`);
+      console.log(`gameboard row col: ${gameBoard[row][col]}`);
+      gameBoard[row][col] = "M";
+    } else {
+      console.log(`gameboard row col: ${gameBoard[row][col]}`);
+      console.log("You have already picked this location. Miss!");
+    }
   }
 };
 
