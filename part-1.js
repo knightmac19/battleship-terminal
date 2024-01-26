@@ -22,8 +22,8 @@ const getRandomNumber = (min, max) => {
 
 const generateCoordinates = (shipNum, alreadyAssigned = []) => {
   let coordinates = [];
-  for (let i = 1; i < 3; i++) {
-    coordinates.push(getRandomNumber(1, 4));
+  for (let i = 0; i < 2; i++) {
+    coordinates.push(getRandomNumber(0, 2));
   }
 
   // recursion call to ensure the ships don't have the same coordinates
@@ -58,65 +58,40 @@ const init = () => {
     const input = readlineSync
       .question('Enter a location to strike (e.g. "A2": ')
       .toUpperCase();
+    console.log(input);
 
-    const col = input.charCodeAt(0) - 64;
-    const row = parseInt(input[1]);
+    const col = input.charCodeAt(0) - 65;
+    const row = parseInt(input[1] - 1);
     console.log(`row: ${row}, col: ${col}`);
 
-    console.log(validateGuess(col, row));
+    console.log(validateGuess(row, col));
 
     if (!validateGuess(row, col)) {
       console.log("Invalid input. Try again.");
       continue;
     }
 
-    if (checkForHit(shipOneCoordinates, row, col)) {
-      console.log(
-        `Hit. You have sunk a battleship. ${--shipsRemaining} ship(s) remaining`
-      );
-      console.log(`gameboard row col: ${gameBoard[row][col]}`);
-      gameBoard[row][col] = "X";
-    } else if (
-      !checkForHit(shipOneCoordinates, row, col) &&
-      gameBoard[row][col] === "O"
-    ) {
-      console.log(`Missed. Try again!`);
-      console.log(`gameboard row col: ${gameBoard[row][col]}`);
-      gameBoard[row][col] = "M";
-    } else {
-      console.log(`gameboard row col: ${gameBoard[row][col]}`);
-      console.log("You have already picked this location. Miss!");
-    }
-
-    if (checkForHit(shipTwoCoordinates, row, col)) {
-      console.log(
-        `Hit. You have sunk a battleship. ${--shipsRemaining} ship(s) remaining`
-      );
-      console.log(`gameboard row col: ${gameBoard[row][col]}`);
-      gameBoard[row][col] = "X";
-    } else if (
-      !checkForHit(shipTwoCoordinates, row, col) &&
-      gameBoard[row][col] === "O"
-    ) {
-      console.log(`Missed. Try again!`);
-      console.log(`gameboard row col: ${gameBoard[row][col]}`);
-      gameBoard[row][col] = "M";
-    } else {
-      console.log(`gameboard row col: ${gameBoard[row][col]}`);
-      console.log("You have already picked this location. Miss!");
-    }
+    checkForHit(shipOneCoordinates, row, col);
   }
 };
 
 const validateGuess = (col, row) => {
-  return col > 0 && col <= 3 && row > 0 && row <= 3;
+  if (col >= 0 && col < 3 && row >= 0 && row < 3) {
+    return "valid input";
+  } else {
+    return false;
+  }
 };
 
-const checkForHit = (shipCoords, col, row) => {
-  if (shipCoords[0] === col && shipCoords[1] === row) {
-    return true;
-  }
-  return false;
+const checkForHit = (shipCoords, row, col) => {
+  console.log(
+    `shipCoords: ${shipCoords[0]}, ${shipCoords[1]} \n guessCoords: ${row}, ${col}`
+  );
+
+  // if (shipCoords[0] === row && shipCoords[1] === col) {
+  //   return true;
+  // }
+  // return false;
 };
 
 init();
