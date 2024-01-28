@@ -1,8 +1,5 @@
 const readlineSync = require("readline-sync");
 
-let prevHits = [];
-let prevMisses = [];
-
 const generateBoard = () => {
   const board = [];
   for (let i = 0; i < 3; i++) {
@@ -40,25 +37,64 @@ const checkPrevious = (arr, guess) => {
     if (arr[i][0] === guess[0] && arr[i][1] === guess[1]) {
       return true;
     }
+  }
+  return false;
+};
+
+const validateGuess = (col, row) => {
+  if (col >= 0 && col < 3 && row >= 0 && row < 3) {
+    return "valid input";
+  } else {
     return false;
   }
 };
 
 const init = () => {
-  console.log("Press any key to start the game");
-  readlineSync.keyIn();
-
   let gameBoard = generateBoard();
   let shipsRemaining = 2;
 
   const [shipOneCoords, shipTwoCoords] = generateCoordinates();
 
   // reset arrays to empty for each new game
-  prevHits = [];
-  prevMisses = [];
+  let prevHits = [];
+  let prevMisses = [];
 
-  console.log(`shipOneCoords: ${shipOneCoords}`);
-  console.log(`shipTwoCoords: ${shipTwoCoords}`);
+  const checkForHit = (coordsArr, row, col) => {
+    if (checkPrevious(prevHits, [row, col])) {
+      console.log(`You already hit a battleship at this location!`);
+      return;
+    }
+
+    if (checkPrevious(prevMisses, [row, col])) {
+      console.log(`You have already picked this location. Miss!`);
+      return;
+    }
+
+    if (coordsArr[0][0] === row && coordsArr[0][1] === col) {
+      shipsRemaining--;
+      prevHits.push([row, col]);
+
+      console.log(
+        `Hit. You have sunk a battleship. ${shipsRemaining} ship(s) remaining.`
+      );
+      return true;
+    } else if (coordsArr[1][0] === row && coordsArr[1][1] === col) {
+      shipsRemaining--;
+      prevHits.push([row, col]);
+
+      console.log(
+        `Hit. You have sunk a battleship. ${shipsRemaining} ship(s) remaining.`
+      );
+      return true;
+    } else {
+      prevMisses.push([row, col]);
+      console.log("You have missed!");
+      return false;
+    }
+  };
+
+  console.log("Press any key to start the game");
+  readlineSync.keyIn();
 
   while (shipsRemaining > 0) {
     console.log(displayBoard(gameBoard));
@@ -70,9 +106,6 @@ const init = () => {
 
     const col = input.charCodeAt(0) - 65;
     const row = parseInt(input[1] - 1);
-    console.log(`row: ${row}, col: ${col}`);
-
-    console.log(validateGuess(row, col));
 
     if (!validateGuess(row, col)) {
       console.log("Invalid input. Try again.");
@@ -80,50 +113,17 @@ const init = () => {
     }
 
     // check to see if it's a hit or a miss
-    checkForHit([shipOneCoords, shipTwoCoords], row, col, shipsRemaining);
+    checkForHit([shipOneCoords, shipTwoCoords], row, col);
   }
 
-  // const input = readlineSync
-  //   .question('Enter a location to strike (e.g. "A2": ')
-  //   .toUpperCase();
-  // console.log(input);
-};
+  const restart = readlineSync.keyInYN(
+    "You have destroyed all battleships. Would you like to play again? Y/N"
+  );
 
-const validateGuess = (col, row) => {
-  if (col >= 0 && col < 3 && row >= 0 && row < 3) {
-    return "valid input";
+  if (restart) {
+    init();
   } else {
-    return false;
-  }
-};
-
-// inside checkForHit: at each hit check, if prevHits.length = 1, then say 'one remaining'
-// if prevHits.length = 2, then say 'none remaining'
-
-const checkForHit = (coordsArr, row, col, remaining) => {
-  if (checkPrevious(prevHits, [row, col])) {
-    console.log(`You already hit a battleship at this location!`);
-    return;
-  } else if (checkPrevious(prevMisses, [row, col])) {
-    console.log(`You have already picked this location. Miss!`);
-  } else {
-    if (coordsArr[0][0] === row && coordsArr[0][1] === col) {
-      remaining--;
-      prevHits.push([row, col]);
-      console.log(
-        `Hit. You have sunk a battleship. ${remaining} ship(s) remaining.`
-      );
-      return true;
-    } else if (coordsArr[1][0] === row && coordsArr[1][1] === col) {
-      remaining--;
-      prevHits.push([row, col]);
-      console.log(
-        `Hit. You have sunk a battleship. ${remaining} ship(s) remaining.`
-      );
-      return true;
-    } else {
-      return false;
-    }
+    process.exit();
   }
 };
 
