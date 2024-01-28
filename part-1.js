@@ -1,5 +1,8 @@
 const readlineSync = require("readline-sync");
 
+let prevHits = [];
+let prevMisses = [];
+
 const generateBoard = () => {
   const board = [];
   for (let i = 0; i < 3; i++) {
@@ -32,39 +35,58 @@ const generateCoordinates = () => {
   return [shipOne, shipTwo];
 };
 
+const checkPrevious = (arr, guess) => {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i][0] === guess[0] && arr[i][1] === guess[1]) {
+      return true;
+    }
+    return false;
+  }
+};
+
 const init = () => {
   console.log("Press any key to start the game");
   readlineSync.keyIn();
 
   let gameBoard = generateBoard();
-
   let shipsRemaining = 2;
+
   const [shipOneCoords, shipTwoCoords] = generateCoordinates();
+
+  // reset arrays to empty for each new game
+  prevHits = [];
+  prevMisses = [];
 
   console.log(`shipOneCoords: ${shipOneCoords}`);
   console.log(`shipTwoCoords: ${shipTwoCoords}`);
 
-  // while (shipsRemaining > 0) {
-  //   console.log(displayBoard(gameBoard));
+  while (shipsRemaining > 0) {
+    console.log(displayBoard(gameBoard));
 
-  //   const input = readlineSync
-  //     .question('Enter a location to strike (e.g. "A2": ')
-  //     .toUpperCase();
-  //   console.log(input);
+    const input = readlineSync
+      .question('Enter a location to strike (e.g. "A2": ')
+      .toUpperCase();
+    console.log(input);
 
-  //   const col = input.charCodeAt(0) - 65;
-  //   const row = parseInt(input[1] - 1);
-  //   console.log(`row: ${row}, col: ${col}`);
+    const col = input.charCodeAt(0) - 65;
+    const row = parseInt(input[1] - 1);
+    console.log(`row: ${row}, col: ${col}`);
 
-  //   console.log(validateGuess(row, col));
+    console.log(validateGuess(row, col));
 
-  //   if (!validateGuess(row, col)) {
-  //     console.log("Invalid input. Try again.");
-  //     continue;
-  //   }
+    if (!validateGuess(row, col)) {
+      console.log("Invalid input. Try again.");
+      continue;
+    }
 
-  //   checkForHit(shipOneCoords, row, col);
-  // }
+    // check to see if it's a hit or a miss
+    checkForHit([shipOneCoords, shipTwoCoords], row, col, shipsRemaining);
+  }
+
+  // const input = readlineSync
+  //   .question('Enter a location to strike (e.g. "A2": ')
+  //   .toUpperCase();
+  // console.log(input);
 };
 
 const validateGuess = (col, row) => {
@@ -75,15 +97,34 @@ const validateGuess = (col, row) => {
   }
 };
 
-const checkForHit = (shipCoords, row, col) => {
-  console.log(
-    `shipCoords: ${shipCoords[0]}, ${shipCoords[1]} \n guessCoords: ${row}, ${col}`
-  );
+// inside checkForHit: at each hit check, if prevHits.length = 1, then say 'one remaining'
+// if prevHits.length = 2, then say 'none remaining'
 
-  // if (shipCoords[0] === row && shipCoords[1] === col) {
-  //   return true;
-  // }
-  // return false;
+const checkForHit = (coordsArr, row, col, remaining) => {
+  if (checkPrevious(prevHits, [row, col])) {
+    console.log(`You already hit a battleship at this location!`);
+    return;
+  } else if (checkPrevious(prevMisses, [row, col])) {
+    console.log(`You have already picked this location. Miss!`);
+  } else {
+    if (coordsArr[0][0] === row && coordsArr[0][1] === col) {
+      remaining--;
+      prevHits.push([row, col]);
+      console.log(
+        `Hit. You have sunk a battleship. ${remaining} ship(s) remaining.`
+      );
+      return true;
+    } else if (coordsArr[1][0] === row && coordsArr[1][1] === col) {
+      remaining--;
+      prevHits.push([row, col]);
+      console.log(
+        `Hit. You have sunk a battleship. ${remaining} ship(s) remaining.`
+      );
+      return true;
+    } else {
+      return false;
+    }
+  }
 };
 
 init();
