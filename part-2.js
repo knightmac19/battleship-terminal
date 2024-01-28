@@ -1,21 +1,21 @@
 const readlineSync = require("readline-sync");
 
-const generateBoard = () => {
+const generateBoard = (num) => {
   const board = [];
-  for (let i = 0; i < 10; i++) {
-    board.push(Array(10).fill("O"));
+  for (let i = 0; i < num; i++) {
+    board.push(Array(num).fill("O"));
   }
   return board;
 };
 
-const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+const displayBoard = (board, num) => {
+  let letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
-const displayBoard = (board) => {
-  // console.log("\n   A B C D E F G H I J");
+  letters = letters.slice(0, num);
+
   console.log(`\n   ${letters.join(" ")}`);
   for (let i = 0; i < board.length; i++) {
     if (i < 9) {
-      // console.log(" " + (i + 1, board[i].join(" ")));
       console.log(` ${i + 1} ${board[i].join(" ")}`);
     } else {
       console.log(`${i + 1} ${board[i].join(" ")}`);
@@ -57,8 +57,33 @@ const validateGuess = (col, row) => {
   }
 };
 
+const setBoardSize = () => {
+  let num;
+
+  while (true) {
+    // using 5 as the minimum size since 5 ships need to be placed on the grid
+    // total num of cells occupied by 5 ships = 17
+    num = readlineSync.question(
+      "Enter a number between 5 & 10 (inclusive) to create the size of your grid. "
+    );
+
+    num = parseInt(num);
+
+    if (!isNaN(num) && num >= 5 && num <= 10) {
+      break;
+    } else {
+      console.log("Invalid input. Please enter a number between 5 & 10");
+    }
+  }
+
+  return num;
+};
+
 const init = () => {
-  let gameBoard = generateBoard();
+  const boardSize = setBoardSize();
+  console.log("boardSize: " + boardSize);
+
+  let gameBoard = generateBoard(boardSize);
   let shipsRemaining = 2;
 
   const [shipOneCoords, shipTwoCoords] = generateCoordinates();
@@ -105,7 +130,7 @@ const init = () => {
   readlineSync.keyIn();
 
   while (shipsRemaining > 0) {
-    console.log(displayBoard(gameBoard));
+    console.log(displayBoard(gameBoard, boardSize));
 
     const input = readlineSync
       .question('Enter a location to strike (e.g. "A2": ')
