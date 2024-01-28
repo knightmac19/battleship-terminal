@@ -20,26 +20,17 @@ const getRandomNumber = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-const generateCoordinates = (shipNum, alreadyAssigned = []) => {
-  let coordinates = [];
-  for (let i = 0; i < 2; i++) {
-    coordinates.push(getRandomNumber(0, 2));
+const generateCoordinates = () => {
+  let shipOne = [getRandomNumber(0, 2), getRandomNumber(0, 2)];
+  let shipTwo = [getRandomNumber(0, 2), getRandomNumber(0, 2)];
+
+  // make sure ships don't have the same coordinates
+  while (shipOne[0] === shipTwo[0] && shipOne[1] === shipTwo[1]) {
+    shipTwo = [getRandomNumber(0, 2), getRandomNumber(0, 2)];
   }
 
-  // recursion call to ensure the ships don't have the same coordinates
-  if (
-    shipNum === 2 &&
-    alreadyAssigned[0] === shipOneCoordinates[0] &&
-    alreadyAssigned[1] === shipTwoCoordinates[1]
-  ) {
-    generateCoordinates(2);
-  }
-
-  return coordinates;
+  return [shipOne, shipTwo];
 };
-
-let shipOneCoordinates = generateCoordinates(1);
-let shipTwoCoordinates = generateCoordinates(2);
 
 const init = () => {
   console.log("Press any key to start the game");
@@ -48,31 +39,32 @@ const init = () => {
   let gameBoard = generateBoard();
 
   let shipsRemaining = 2;
+  const [shipOneCoords, shipTwoCoords] = generateCoordinates();
 
-  console.log(`shipOneCoordinates: ${shipOneCoordinates}`);
-  console.log(`shipTwoCoordinates: ${shipTwoCoordinates}`);
+  console.log(`shipOneCoords: ${shipOneCoords}`);
+  console.log(`shipTwoCoords: ${shipTwoCoords}`);
 
-  while (shipsRemaining > 0) {
-    console.log(displayBoard(gameBoard));
+  // while (shipsRemaining > 0) {
+  //   console.log(displayBoard(gameBoard));
 
-    const input = readlineSync
-      .question('Enter a location to strike (e.g. "A2": ')
-      .toUpperCase();
-    console.log(input);
+  //   const input = readlineSync
+  //     .question('Enter a location to strike (e.g. "A2": ')
+  //     .toUpperCase();
+  //   console.log(input);
 
-    const col = input.charCodeAt(0) - 65;
-    const row = parseInt(input[1] - 1);
-    console.log(`row: ${row}, col: ${col}`);
+  //   const col = input.charCodeAt(0) - 65;
+  //   const row = parseInt(input[1] - 1);
+  //   console.log(`row: ${row}, col: ${col}`);
 
-    console.log(validateGuess(row, col));
+  //   console.log(validateGuess(row, col));
 
-    if (!validateGuess(row, col)) {
-      console.log("Invalid input. Try again.");
-      continue;
-    }
+  //   if (!validateGuess(row, col)) {
+  //     console.log("Invalid input. Try again.");
+  //     continue;
+  //   }
 
-    checkForHit(shipOneCoordinates, row, col);
-  }
+  //   checkForHit(shipOneCoords, row, col);
+  // }
 };
 
 const validateGuess = (col, row) => {
