@@ -212,18 +212,18 @@ const generateShipCoords = (
 
 const setBoardSize = () => {
   let num;
-
+  // minimum board size: 5x5 since there are 17 spaces needed for 5 ships
   while (true) {
     num = rs.question(
-      "Enter a number between 6 & 10 (inclusive) to create the size of your grid. "
+      "Enter a number between 5 & 10 (inclusive) to create the size of your grid. "
     );
 
     num = parseInt(num);
 
-    if (!isNaN(num) && num >= 6 && num <= 10) {
+    if (!isNaN(num) && num >= 5 && num <= 10) {
       break;
     } else {
-      console.log("Invalid input. Please enter a number between 6 & 10");
+      console.log("Invalid input. Please enter a number between 5 & 10");
     }
   }
 
