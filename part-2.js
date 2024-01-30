@@ -15,12 +15,6 @@ const arrayIncludes = (arr, guess) => {
   return false;
 };
 
-const logShips = (arr) => {
-  for (let i = 0; i < arr.length; i++) {
-    console.log(arr[i]);
-  }
-};
-
 const getRandomNumber = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
@@ -235,12 +229,9 @@ const init = () => {
   let shipsRemaining = 5;
 
   let boardSize = setBoardSize();
-  console.log("boardSize: " + boardSize);
 
   let gameBoard = generateBoard(boardSize);
   setShips(ships, boardSize);
-
-  logShips(ships);
 
   // reset arrays to empty for each new game
   let prevHits = [];
@@ -255,7 +246,6 @@ const init = () => {
   };
 
   const checkForHit = (ships, guess) => {
-    console.log(`guess: ${guess}`);
     if (arrayIncludes(prevHits, guess)) {
       console.log(`You already hit a battleship at this location!`);
       return;
@@ -267,12 +257,6 @@ const init = () => {
     }
 
     for (let i = 0; i < ships.length; i++) {
-      console.log("\n");
-      console.log(ships[i].coords);
-
-      console.log(guess);
-      // console.log(ships[i].coords.includes(guess));
-
       for (let j = 0; j < ships[i].coords.length; j++) {
         if (
           ships[i].coords[j][0] === guess[0] &&
