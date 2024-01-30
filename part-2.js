@@ -293,8 +293,17 @@ const init = () => {
       .toUpperCase();
     console.log(input);
 
-    const col = input.charCodeAt(0) - 65;
-    const row = parseInt(input[1] - 1);
+    let row = 0;
+    let col = 0;
+
+    if (input.length == 3) {
+      col = input.charCodeAt(0) - 65;
+      row = parseInt([input[1], input[2]].join("")) - 1;
+    } else {
+      col = input.charCodeAt(0) - 65;
+      row = parseInt(input[1] - 1);
+    }
+
     let guess = [row, col];
 
     if (!validateGuess(row, col, boardSize)) {

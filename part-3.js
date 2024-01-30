@@ -78,10 +78,10 @@ const setShips = (arr, boardSize) => {
 
 const generateLocation = (boardSize, shipLength, shipName, ships) => {
   let placed = false;
-  let max = boardSize - 1;
+  let max = boardSize;
 
   while (!placed) {
-    let randLoc = [getRandomNumber(0, max), getRandomNumber(0, max)];
+    let randLoc = [getRandomNumber(0, max - 1), getRandomNumber(0, max - 1)];
 
     let valid = generateShipCoords(
       randLoc,
@@ -307,8 +307,17 @@ const init = () => {
       .toUpperCase();
     console.log(input);
 
-    const col = input.charCodeAt(0) - 65;
-    const row = parseInt(input[1] - 1);
+    let row = 0;
+    let col = 0;
+
+    if (input.length == 3) {
+      col = input.charCodeAt(0) - 65;
+      row = parseInt([input[1], input[2]].join("")) - 1;
+    } else {
+      col = input.charCodeAt(0) - 65;
+      row = parseInt(input[1] - 1);
+    }
+
     let guess = [row, col];
 
     if (!validateGuess(row, col, boardSize)) {

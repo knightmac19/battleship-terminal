@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/knightmac19/battleship-terminal#readme",
   "dependencies": {
-    "readline-sync": "^1.4.10"
+    "readline-sync": "^1.4.10",
+    "util": "^0.12.5"
   }
 }
