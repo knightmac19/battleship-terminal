@@ -1,4 +1,44 @@
-const readlineSync = require("readline-sync");
+const rs = require("readline-sync");
+
+const previouslyUsed = [];
+
+const arrayIncludes = (arr, guess) => {
+  if (arr.length === 0) {
+    return false;
+  }
+
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i][0] === guess[0] && arr[i][1] === guess[1]) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const logShips = (arr) => {
+  for (let i = 0; i < arr.length; i++) {
+    console.log(arr[i]);
+  }
+};
+
+const getRandomNumber = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+const isUnique = (previous, newCoords) => {
+  for (let i = 0; i < newCoords.length; i++) {
+    for (let j = 0; j < previous.length; j++) {
+      if (
+        newCoords[i][0] === previous[j][0] &&
+        newCoords[i][1] === previous[j][1]
+      ) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
 
 const generateBoard = (num) => {
   const board = [];
@@ -24,36 +64,143 @@ const displayBoard = (board, num) => {
   return "";
 };
 
-const getRandomNumber = (min, max) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-const generateCoordinates = () => {
-  let shipOne = [getRandomNumber(0, 2), getRandomNumber(0, 2)];
-  let shipTwo = [getRandomNumber(0, 2), getRandomNumber(0, 2)];
-
-  // make sure ships don't have the same coordinates
-  while (shipOne[0] === shipTwo[0] && shipOne[1] === shipTwo[1]) {
-    shipTwo = [getRandomNumber(0, 2), getRandomNumber(0, 2)];
-  }
-
-  return [shipOne, shipTwo];
-};
-
-const checkPrevious = (arr, guess) => {
+const setShips = (arr, boardSize) => {
   for (let i = 0; i < arr.length; i++) {
-    if (arr[i][0] === guess[0] && arr[i][1] === guess[1]) {
-      return true;
+    generateLocation(boardSize, arr[i].length, arr[i].name, arr);
+  }
+};
+
+const generateLocation = (boardSize, shipLength, shipName, ships) => {
+  let placed = false;
+  let max = boardSize - 1;
+
+  while (!placed) {
+    let randLoc = [getRandomNumber(0, max), getRandomNumber(0, max)];
+
+    let valid = generateShipCoords(
+      randLoc,
+      shipLength,
+      previouslyUsed,
+      ships,
+      shipName,
+      max
+    );
+
+    if (valid) {
+      placed = true;
     }
   }
-  return false;
 };
 
-const validateGuess = (col, row) => {
-  if (col >= 0 && col < 3 && row >= 0 && row < 3) {
-    return "valid input";
+const updateShipsCoords = (ships, shipCoords, shipName) => {
+  return ships
+    .filter((ship) => ship.name === shipName)
+    .map((ship) => (ship.coords = shipCoords));
+};
+
+const updatePreviouslyUsed = (newCoords) => {
+  for (let i = 0; i < newCoords.length; i++) {
+    previouslyUsed.push(newCoords[i]);
+  }
+};
+
+const generateShipCoords = (
+  randomLocation,
+  shipLength,
+  previouslyUsed,
+  ships,
+  shipName,
+  max
+) => {
+  let valid = false;
+  // generate random num 0-3 to determine direction from random location
+  let startingDir = Math.floor(Math.random() * 4);
+
+  // check to the right
+  if (startingDir === 0) {
+    if (randomLocation[1] + shipLength <= max) {
+      let shipCoordsArray = [];
+      shipCoordsArray.push(randomLocation);
+      for (let i = 1; i < shipLength; i++) {
+        shipCoordsArray.push([randomLocation[0], randomLocation[1] + i]);
+      }
+
+      if (!isUnique(previouslyUsed, shipCoordsArray)) {
+        return valid;
+      } else {
+        updateShipsCoords(ships, shipCoordsArray, shipName);
+
+        updatePreviouslyUsed(shipCoordsArray);
+
+        return (valid = true);
+      }
+    } else {
+      return valid;
+    }
+  } else if (startingDir === 1) {
+    // check down
+    if (randomLocation[0] + shipLength <= max) {
+      let shipCoordsArray = [];
+      shipCoordsArray.push(randomLocation);
+      for (let i = 1; i < shipLength; i++) {
+        shipCoordsArray.push([randomLocation[0] + i, randomLocation[1]]);
+      }
+
+      if (!isUnique(previouslyUsed, shipCoordsArray)) {
+        return valid;
+      } else {
+        updateShipsCoords(ships, shipCoordsArray, shipName);
+
+        updatePreviouslyUsed(shipCoordsArray);
+
+        return (valid = true);
+      }
+    } else {
+      return valid;
+    }
+  } else if (startingDir === 2) {
+    // check to the left
+    if (randomLocation[1] - shipLength >= 0) {
+      let shipCoordsArray = [];
+      shipCoordsArray.push(randomLocation);
+      for (let i = 1; i < shipLength; i++) {
+        shipCoordsArray.push([randomLocation[0], randomLocation[1] - i]);
+      }
+
+      if (!isUnique(previouslyUsed, shipCoordsArray)) {
+        return valid;
+      } else {
+        updateShipsCoords(ships, shipCoordsArray, shipName);
+
+        updatePreviouslyUsed(shipCoordsArray);
+
+        return (valid = true);
+      }
+    } else {
+      return valid;
+    }
   } else {
-    return false;
+    // check up (and startingDir === 3)
+    if (randomLocation[0] - shipLength >= 0) {
+      let shipCoordsArray = [];
+
+      shipCoordsArray.push(randomLocation);
+      for (let i = 1; i < shipLength; i++) {
+        shipCoordsArray.push([randomLocation[0] - i, randomLocation[1]]);
+      }
+
+      if (!isUnique(previouslyUsed, shipCoordsArray)) {
+        return valid;
+      } else {
+        updateShipsCoords(ships, shipCoordsArray, shipName);
+
+        updatePreviouslyUsed(shipCoordsArray);
+
+        return (valid = true);
+      }
+    } else {
+      return valid;
+    }
   }
 };
 
@@ -61,18 +208,16 @@ const setBoardSize = () => {
   let num;
 
   while (true) {
-    // using 5 as the minimum size since 5 ships need to be placed on the grid
-    // total num of cells occupied by 5 ships = 17
-    num = readlineSync.question(
-      "Enter a number between 5 & 10 (inclusive) to create the size of your grid. "
+    num = rs.question(
+      "Enter a number between 6 & 10 (inclusive) to create the size of your grid. "
     );
 
     num = parseInt(num);
 
-    if (!isNaN(num) && num >= 5 && num <= 10) {
+    if (!isNaN(num) && num >= 6 && num <= 10) {
       break;
     } else {
-      console.log("Invalid input. Please enter a number between 5 & 10");
+      console.log("Invalid input. Please enter a number between 6 & 10");
     }
   }
 
@@ -80,76 +225,103 @@ const setBoardSize = () => {
 };
 
 const init = () => {
-  const boardSize = setBoardSize();
+  const ships = [
+    { name: "destroyer", length: 2, coords: [] },
+    { name: "corvette1", length: 3, coords: [] },
+    { name: "corvette2", length: 3, coords: [] },
+    { name: "battleship", length: 4, coords: [] },
+    { name: "carrier", length: 5, coords: [] },
+  ];
+  let shipsRemaining = 5;
+
+  let boardSize = setBoardSize();
   console.log("boardSize: " + boardSize);
 
   let gameBoard = generateBoard(boardSize);
-  let shipsRemaining = 2;
+  setShips(ships, boardSize);
 
-  const [shipOneCoords, shipTwoCoords] = generateCoordinates();
+  logShips(ships);
 
   // reset arrays to empty for each new game
   let prevHits = [];
   let prevMisses = [];
 
-  const checkForHit = (coordsArr, row, col) => {
-    if (checkPrevious(prevHits, [row, col])) {
-      console.log(`You already hit a battleship at this location!`);
-      return;
-    }
-
-    if (checkPrevious(prevMisses, [row, col])) {
-      console.log(`You have already picked this location. Miss!`);
-      return;
-    }
-
-    if (coordsArr[0][0] === row && coordsArr[0][1] === col) {
-      shipsRemaining--;
-      prevHits.push([row, col]);
-
-      console.log(
-        `Hit. You have sunk a battleship. ${shipsRemaining} ship(s) remaining.`
-      );
-      return true;
-    } else if (coordsArr[1][0] === row && coordsArr[1][1] === col) {
-      shipsRemaining--;
-      prevHits.push([row, col]);
-
-      console.log(
-        `Hit. You have sunk a battleship. ${shipsRemaining} ship(s) remaining.`
-      );
-      return true;
+  const validateGuess = (col, row, max) => {
+    if (col >= 0 && col < max && row >= 0 && row < max) {
+      return "valid input";
     } else {
-      prevMisses.push([row, col]);
-      console.log("You have missed!");
       return false;
     }
   };
 
+  const checkForHit = (ships, guess) => {
+    console.log(`guess: ${guess}`);
+    if (arrayIncludes(prevHits, guess)) {
+      console.log(`You already hit a battleship at this location!`);
+      return;
+    }
+
+    if (arrayIncludes(prevMisses, guess)) {
+      console.log(`You have already picked this location. Miss!`);
+      return;
+    }
+
+    for (let i = 0; i < ships.length; i++) {
+      console.log("\n");
+      console.log(ships[i].coords);
+
+      console.log(guess);
+      // console.log(ships[i].coords.includes(guess));
+
+      for (let j = 0; j < ships[i].coords.length; j++) {
+        if (
+          ships[i].coords[j][0] === guess[0] &&
+          ships[i].coords[j][1] === guess[1]
+        ) {
+          if (ships[i].length === 1) {
+            shipsRemaining--;
+
+            console.log(
+              `Hit! You have sunk the ${ships[i].name}. ${shipsRemaining} ship(s) remaining.`
+            );
+          } else {
+            console.log(`Hit! You have hit the ${ships[i].name}.`);
+          }
+          ships[i].length--;
+          prevHits.push(guess);
+          return true;
+        }
+      }
+    }
+    prevMisses.push(guess);
+    console.log("You have missed!");
+    return false;
+  };
+
   console.log("Press any key to start the game");
-  readlineSync.keyIn();
+  rs.keyIn();
 
   while (shipsRemaining > 0) {
     console.log(displayBoard(gameBoard, boardSize));
 
-    const input = readlineSync
+    const input = rs
       .question('Enter a location to strike (e.g. "A2": ')
       .toUpperCase();
     console.log(input);
 
     const col = input.charCodeAt(0) - 65;
     const row = parseInt(input[1] - 1);
+    let guess = [row, col];
 
-    if (!validateGuess(row, col)) {
+    if (!validateGuess(row, col, boardSize)) {
       console.log("Invalid input. Try again.");
       continue;
     }
 
-    // check to see if it's a hit or a miss
-    checkForHit([shipOneCoords, shipTwoCoords], row, col);
+    checkForHit(ships, guess);
   }
 
-  const restart = readlineSync.keyInYN(
+  const restart = rs.keyInYN(
     "You have destroyed all battleships. Would you like to play again? Y/N"
   );
 
